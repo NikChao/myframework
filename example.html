@@ -16,6 +16,10 @@
         <div f-for="todo in todos">
             <p style="color: skyblue;">{{ todo.descr }}</p>
         </div>
+        <div f-for="todo in todosstr">
+            {{ todo }}
+            <br />
+        </div>
     </div>
     <script type="text/javascript">
         var app = new Frame({
@@ -27,6 +31,10 @@
                 todos: [
                     { descr: 'groceries' },
                     { descr: 'work' }
+                ],
+                todosstr: [
+                    'make framework',
+                    'apply at canva'
                 ]
             }
         });

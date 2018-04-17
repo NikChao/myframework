@@ -26,8 +26,14 @@ class Frame {
             let childMarkup = domu(child).html();
             let markup = "";
 
-            for (const todo of list) {
-                markup += childMarkup.replace("{{ todo.descr }}", todo.descr)
+            for (const item of list) {
+                if (typeof item !== "object") {
+                    markup += childMarkup.replace(`{{ ${itemName} }}`, item);
+                    continue;                    
+                }
+                for (const k of Object.keys(item)) {
+                    markup += childMarkup.replace(`{{ ${itemName}.${k} }}`, item[k]);
+                }
             }
             domu(child).html(markup);
         }
