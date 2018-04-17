@@ -8,11 +8,28 @@ class VirtualDOMNode {
         }
     }
 
+    render(data) {
+        let markup = this.el;
+
+        Object.keys(data).forEach((key) => {
+            const template = `{{ ${key} }}`;
+            markup = markup.replace(template, data[key]);
+        });
+
+        for (let child of this.children) {
+            markup += child.render(data);
+        }
+
+        return markup;
+    }
+
     constructor(el) {
         // list of either VirtualDOMNodes OR Frames
-        this.el = domu(el).el;
+        el = domu(el).el;
+        this.el = domu(el).el.outerHTML;
+        this.elIsFrame = false;
         this.children = [];
-        let children = this.el.children;
+        let children = el.children;
         if (children !== undefined && children.length > 0) {
             for (let child of children) {
                 this.children = [...this.children, new VirtualDOMNode(child)]
@@ -65,17 +82,10 @@ class Frame {
     }
 
     build() {
-        this.bindConditionals();
-        this.bindLoops();
     }
 
     draw() {
-        let markup = this.el.html();
-        Object.keys(this.data).forEach((key) => {
-            const template = `{{ ${key} }}`;
-            markup = markup.replace(template, this.data[key]);
-        });
-        this.el.html(markup);
+        this.el.html(this.virtualDOM.render(this.data));
     }
 
     constructor(options) {
