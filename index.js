@@ -8,25 +8,32 @@ class VirtualDOMNode {
         }
     }
 
+    /**
+     * Optimize this for if you only have to update one branch or w/e
+     * basically do a min-diff type of thing
+     * 
+     * @param {this state passed by reference} data 
+     */
     render(data) {
-        let markup = this.el;
+        let markup = this.elMarkup;
 
         Object.keys(data).forEach((key) => {
             const template = `{{ ${key} }}`;
             markup = markup.replace(template, data[key]);
         });
 
-        for (let child of this.children) {
-            markup += child.render(data);
-        }
+        domu(this.el).html(markup);
 
-        return markup;
+        for (let child of this.children) {
+            child.render(data);
+        }
     }
 
     constructor(el) {
         // list of either VirtualDOMNodes OR Frames
         el = domu(el).el;
-        this.el = domu(el).el.outerHTML;
+        this.el = el;
+        this.elMarkup = el.outerHTML;
         this.elIsFrame = false;
         this.children = [];
         let children = el.children;
@@ -85,7 +92,7 @@ class Frame {
     }
 
     draw() {
-        this.el.html(this.virtualDOM.render(this.data));
+        this.virtualDOM.render(this.data);
     }
 
     constructor(options) {
