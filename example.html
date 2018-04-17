@@ -14,7 +14,9 @@
         </div>
 
         <div f-for="todo in todos">
-            <p style="color: skyblue;">{{ todo.descr }}</p>
+            <p style="color: skyblue;">
+                {{ todo.descr }} : {{ todo.due }}
+            </p>
         </div>
         <div f-for="todo in todosstr">
             {{ todo }}
@@ -29,8 +31,8 @@
                 secretMessage: 'Hello secret.',
                 show: 'false',
                 todos: [
-                    { descr: 'groceries' },
-                    { descr: 'work' }
+                    { descr: 'groceries', due: 'today' },
+                    { descr: 'work', due: 'tomorrow' }
                 ],
                 todosstr: [
                     'make framework',

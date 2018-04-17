@@ -31,9 +31,12 @@ class Frame {
                     markup += childMarkup.replace(`{{ ${itemName} }}`, item);
                     continue;                    
                 }
+
+                let temp = childMarkup;
                 for (const k of Object.keys(item)) {
-                    markup += childMarkup.replace(`{{ ${itemName}.${k} }}`, item[k]);
+                    temp = temp.replace(`{{ ${itemName}.${k} }}`, item[k]);
                 }
+                markup += temp;
             }
             domu(child).html(markup);
         }
