@@ -1,0 +1,28 @@
+<html>
+
+<head>
+    <script type="text/javascript" src="./domu.js"></script>
+    <script type="text/javascript" src="./index.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        {{ message }}
+
+        <div f-if="show">
+            {{ secretMessage }}
+        </div>
+    </div>
+    <script type="text/javascript">
+        var app = new Frame({
+            el: '#app',
+            data: {
+                message: 'Hello Frame!',
+                secretMessage: 'Hello secret.',
+                show: 'false'
+            }
+        });
+    </script>
+</body>
+
+</html>
