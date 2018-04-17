@@ -16,11 +16,26 @@ class Frame {
     }
 
     bindLoops() {
+        for (let child of this.el.el.children) {
+            const key = child.getAttribute("f-for");
+            if (key == null) continue;
+            const [itemName, listName] = key.split(" in ");
+            const list = this.data[listName];
+            if (list === undefined) continue;
 
+            let childMarkup = domu(child).html();
+            let markup = "";
+
+            for (const todo of list) {
+                markup += childMarkup.replace("{{ todo.descr }}", todo.descr)
+            }
+            domu(child).html(markup);
+        }
     }
 
     build() {
         this.bindConditionals();
+        this.bindLoops();
     }
 
     draw() {

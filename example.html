@@ -12,6 +12,10 @@
         <div f-if="show">
             {{ secretMessage }}
         </div>
+
+        <div f-for="todo in todos">
+            <p style="color: skyblue;">{{ todo.descr }}</p>
+        </div>
     </div>
     <script type="text/javascript">
         var app = new Frame({
@@ -19,7 +23,11 @@
             data: {
                 message: 'Hello Frame!',
                 secretMessage: 'Hello secret.',
-                show: 'false'
+                show: 'false',
+                todos: [
+                    { descr: 'groceries' },
+                    { descr: 'work' }
+                ]
             }
         });
     </script>
