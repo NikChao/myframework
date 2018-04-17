@@ -1,5 +1,27 @@
-class Frame {
+class VirtualDOMNode {
+    minUpdate(newState) {
+        return function () {
+            console.log(
+                'here we will return a function, that will do the minimum change to the dom',
+                'to achieve the new state'
+            );
+        }
+    }
 
+    constructor(el) {
+        // list of either VirtualDOMNodes OR Frames
+        this.el = domu(el).el;
+        this.children = [];
+        let children = this.el.children;
+        if (children !== undefined && children.length > 0) {
+            for (let child of children) {
+                this.children = [...this.children, new VirtualDOMNode(child)]
+            }
+        }
+    }
+}
+
+class Frame {
     bindHandlers() {
 
     }
@@ -29,7 +51,7 @@ class Frame {
             for (const item of list) {
                 if (typeof item !== "object") {
                     markup += childMarkup.replace(`{{ ${itemName} }}`, item);
-                    continue;                    
+                    continue;
                 }
 
                 let temp = childMarkup;
@@ -72,6 +94,7 @@ class Frame {
             methods;
 
         this.build();
+        this.virtualDOM = new VirtualDOMNode(el);
         this.draw();
     }
 }
