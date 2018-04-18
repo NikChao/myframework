@@ -45,5 +45,4 @@ function domu(...args) {
     if (args.length < 2) {
         return elfactory(args[0]);
     }
-
 }

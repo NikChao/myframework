@@ -8,24 +8,54 @@ class VirtualDOMNode {
         }
     }
 
+    bindLoops(data) {
+
+        for (let child of this.el.children) {
+            const key = child.getAttribute("f-for");
+            if (key == null) continue;
+            const [itemName, listName] = key.split(" in ");
+
+            const list = data[listName];
+            if (list === undefined) continue;
+            let childMarkup = domu(child).html();
+
+            let markup = "";
+            for (const item of list) {
+                if (typeof item !== "object") {
+                    markup += childMarkup.replace(`{{ ${itemName} }}`, item);
+                    continue;
+                }
+
+                let temp = childMarkup;
+                for (const k of Object.keys(item)) {
+                    temp = temp.replace(`{{ ${itemName}.${k} }}`, item[k]);
+                }
+                markup += temp;
+                domu(child).html(markup);
+            }
+        }
+    }
+
     /**
      * Optimize this for if you only have to update one branch or w/e
      * basically do a min-diff type of thing
      * 
      * @param {this state passed by reference} data 
      */
-    render(data) {
+    render(frame) {
         let markup = this.elMarkup;
 
-        Object.keys(data).forEach((key) => {
+        Object.keys(frame.data).forEach((key) => {
             const template = `{{ ${key} }}`;
-            markup = markup.replace(template, data[key]);
+            markup = markup.replace(template, frame.data[key]);
         });
+
+        this.bindLoops(frame.data);
 
         domu(this.el).html(markup);
 
         for (let child of this.children) {
-            child.render(data);
+            child.render(frame);
         }
     }
 
@@ -46,53 +76,56 @@ class VirtualDOMNode {
 }
 
 class Frame {
-    bindHandlers() {
+    setState(data) {
+        this.data = data;
+        this.draw();
+    }
 
+    build() {
+    }
+
+    bindMethods() {
+        // bind methods
+        let children = this.el.el.children[0].children
+        for (let child of children) {
+
+            const attrs = child.getAttributeNames()
+                .filter(n => n.startsWith('f-on'))
+                .map(n => n.split(':')[1]);
+            if (attrs.length === 0) {
+                continue;
+            }
+
+            for (const attr of attrs) {
+                if (attr === "click") {
+                    const methodName = child.getAttribute(`f-on:${attr}`);
+                    this.methods[methodName] = this.methods[methodName].bind(this.data);
+                    domu(child).click(() => {
+                        this.methods[methodName]();
+                        this.draw(this);
+                        this.methods[methodName] = this.methods[methodName].bind(this.data);
+                    });
+                }
+            }
+        }
     }
 
     bindConditionals() {
-        for (let child of this.el.el.children) {
+        let children = this.el.el.children[0].children
+        for (let child of children) {
             const key = child.getAttribute("f-if");
             if (key !== undefined && Object.keys(this.data).includes(key)) {
-                if (this.data[key]) {
+                if (!this.data[key]) {
                     domu(child).hide();
                 }
             }
         }
     }
 
-    bindLoops() {
-        for (let child of this.el.el.children) {
-            const key = child.getAttribute("f-for");
-            if (key == null) continue;
-            const [itemName, listName] = key.split(" in ");
-            const list = this.data[listName];
-            if (list === undefined) continue;
-
-            let childMarkup = domu(child).html();
-            let markup = "";
-
-            for (const item of list) {
-                if (typeof item !== "object") {
-                    markup += childMarkup.replace(`{{ ${itemName} }}`, item);
-                    continue;
-                }
-
-                let temp = childMarkup;
-                for (const k of Object.keys(item)) {
-                    temp = temp.replace(`{{ ${itemName}.${k} }}`, item[k]);
-                }
-                markup += temp;
-            }
-            domu(child).html(markup);
-        }
-    }
-
-    build() {
-    }
-
     draw() {
-        this.virtualDOM.render(this.data);
+        this.virtualDOM.render(this);
+        this.bindMethods();
+        this.bindConditionals();
     }
 
     constructor(options) {
@@ -113,5 +146,7 @@ class Frame {
         this.build();
         this.virtualDOM = new VirtualDOMNode(el);
         this.draw();
+        this.bindMethods();
+        this.bindConditionals();
     }
 }

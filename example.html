@@ -8,10 +8,16 @@
 <body>
     <div id="app">
         {{ message }}
+        <button f-on:click="reverseMessage">Reverse</button>
+
+        <br />
 
         <div f-if="show">
             {{ secretMessage }}
         </div>
+        <button f-on:click="show">Show/Hide</button>
+
+        <br />
 
         <div f-for="todo in todos">
             <p style="color: skyblue;">
@@ -29,7 +35,7 @@
             data: {
                 message: 'Hello Frame!',
                 secretMessage: 'Hello secret.',
-                show: 'false',
+                show: false,
                 todos: [
                     { descr: 'groceries', due: 'today' },
                     { descr: 'work', due: 'tomorrow' }
@@ -38,11 +44,16 @@
                     'make framework',
                     'apply at canva'
                 ]
+            },
+            methods: {
+                reverseMessage: function () {
+                    this.message = this.message.split('').reverse().join('')
+                },
+                show: function() {
+                    this.show = !this.show;
+                }
             }
         });
-
-        app.data.message = 'Hello, Nik';
-        app.draw();
     </script>
 </body>
 
