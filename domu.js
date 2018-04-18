@@ -13,7 +13,6 @@ function elfactory(node) {
         },
         change: function (callback) {
             this.el.onchange = callback;
-            return this;
         },
         html: function (markup) {
             if (markup === undefined) {

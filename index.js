@@ -8,34 +8,6 @@ class VirtualDOMNode {
         }
     }
 
-    bindLoops(data) {
-
-        for (let child of this.el.children) {
-            const key = child.getAttribute("f-for");
-            if (key == null) continue;
-            const [itemName, listName] = key.split(" in ");
-
-            const list = data[listName];
-            if (list === undefined) continue;
-            let childMarkup = domu(child).html();
-
-            let markup = "";
-            for (const item of list) {
-                if (typeof item !== "object") {
-                    markup += childMarkup.replace(`{{ ${itemName} }}`, item);
-                    continue;
-                }
-
-                let temp = childMarkup;
-                for (const k of Object.keys(item)) {
-                    temp = temp.replace(`{{ ${itemName}.${k} }}`, item[k]);
-                }
-                markup += temp;
-                domu(child).html(markup);
-            }
-        }
-    }
-
     /**
      * Optimize this for if you only have to update one branch or w/e
      * basically do a min-diff type of thing
@@ -49,8 +21,6 @@ class VirtualDOMNode {
             const template = `{{ ${key} }}`;
             markup = markup.replace(template, frame.data[key]);
         });
-
-        this.bindLoops(frame.data);
 
         domu(this.el).html(markup);
 
@@ -76,17 +46,20 @@ class VirtualDOMNode {
 }
 
 class Frame {
-    setState(data) {
-        this.data = data;
-        this.draw();
+    children() {
+        return this.el.el.children[0].children
     }
 
     build() {
+        this.bindLoops();
+        this.bindMethods();
+        this.bindModels();
+        this.bindConditionals();
     }
 
     bindMethods() {
         // bind methods
-        let children = this.el.el.children[0].children
+        let children = this.children();
         for (let child of children) {
 
             const attrs = child.getAttributeNames()
@@ -110,11 +83,56 @@ class Frame {
         }
     }
 
+    bindLoops(data) {
+        let children = this.children();
+        for (let child of children) {
+            const key = child.getAttribute("f-for");
+            if (key == null) continue;
+            const [itemName, listName] = key.split(" in ");
+
+            const list = this.data[listName];
+            if (!list) continue;
+            let childMarkup = domu(child).html();
+
+            let markup = "";
+            for (const item of list) {
+                if (typeof item !== "object") {
+                    markup += childMarkup.replace(`{{ ${itemName} }}`, item);
+                    continue;
+                }
+
+                let temp = childMarkup;
+                for (const k of Object.keys(item)) {
+                    temp = temp.replace(`{{ ${itemName}.${k} }}`, item[k]);
+                }
+                markup += temp;
+            }
+            domu(child).html(markup);
+        }
+    }
+
+    bindModels() {
+        let children = this.children();
+        for (let child of children) {
+            const key = child.getAttribute("f-model");
+            if (!key || !Object.keys(this.data).includes(key)) {
+                continue;
+            }
+            const handler = (e) => {
+                this.data[key] = e.currentTarget.value;
+                this.draw();
+            }
+            domu(child)
+                .val(this.data[key])
+                .change(handler.bind(this));
+        }
+    }
+
     bindConditionals() {
-        let children = this.el.el.children[0].children
+        let children = this.children();
         for (let child of children) {
             const key = child.getAttribute("f-if");
-            if (key !== undefined && Object.keys(this.data).includes(key)) {
+            if (key && Object.keys(this.data).includes(key)) {
                 if (!this.data[key]) {
                     domu(child).hide();
                 }
@@ -123,9 +141,9 @@ class Frame {
     }
 
     draw() {
+        this.build();
         this.virtualDOM.render(this);
-        this.bindMethods();
-        this.bindConditionals();
+        this.build();
     }
 
     constructor(options) {
@@ -143,10 +161,8 @@ class Frame {
             {} :
             methods;
 
-        this.build();
         this.virtualDOM = new VirtualDOMNode(el);
+        this.build();
         this.draw();
-        this.bindMethods();
-        this.bindConditionals();
     }
 }
