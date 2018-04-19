@@ -13,7 +13,6 @@ function elfactory(node) {
         },
         change: function (callback) {
             this.el.onchange = callback;
-            return this;
         },
         html: function (markup) {
             if (markup === undefined) {
@@ -45,5 +44,4 @@ function domu(...args) {
     if (args.length < 2) {
         return elfactory(args[0]);
     }
-
 }

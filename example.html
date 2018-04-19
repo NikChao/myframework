@@ -3,41 +3,41 @@
 <head>
     <script type="text/javascript" src="./domu.js"></script>
     <script type="text/javascript" src="./index.js"></script>
+    <style>
+        p { font-family: 'Courier New', Courier, monospace }
+    </style>
 </head>
 
 <body>
+    <div style="width: 98vw; border-style: 1px solid #333; color: green; line-height: 1em">
+        <p>/** Notes</p>
+        <p> * Currently the virtual dom recurses from root -> all leaves, this is grossly inneficient </p>
+        <p> * Currently change handlers only fire on blur</p>
+        <p> * Nesting logic breaks everything </p>
+        <p> * TODO: f-else to be implemented </p>
+        <p>*/</p>
+    </div>
     <div id="app">
-        {{ message }}
-
-        <div f-if="show">
-            {{ secretMessage }}
-        </div>
-
+        <input f-model="name" />
+        <button f-on:click="add">add</button>
+        <p>Todos</p>
         <div f-for="todo in todos">
-            <p style="color: skyblue;">
-                {{ todo.descr }} : {{ todo.due }}
-            </p>
-        </div>
-        <div f-for="todo in todosstr">
-            {{ todo }}
-            <br />
+            <p>{{ todo.name }}</p>>
         </div>
     </div>
     <script type="text/javascript">
         var app = new Frame({
             el: '#app',
             data: {
-                message: 'Hello Frame!',
-                secretMessage: 'Hello secret.',
-                show: 'false',
-                todos: [
-                    { descr: 'groceries', due: 'today' },
-                    { descr: 'work', due: 'tomorrow' }
-                ],
-                todosstr: [
-                    'make framework',
-                    'apply at canva'
-                ]
+                name: '',
+                todos: [],
+                show: false
+            },
+            methods: {
+                add: function() {
+                    this.todos = [...this.todos, { name: this.name, done: false }];
+                    this.name = '';
+                }
             }
         });
     </script>
