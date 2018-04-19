@@ -1,0 +1,66 @@
+<html>
+
+<head></head>
+
+<body>
+
+    <div id="app" class="im-not-a-wrapper">
+        {{ header }}
+        <div class="col1">
+            <p>1: {{ val }}</p>
+            <p>2 {{ val }}</p>
+        </div>
+        {{ secondheader }}
+        <div class="col2">
+            <p>3 {{ newval }}</p>
+            <p>4 {{ newval }}</p>
+        </div>
+    </div>
+    <!--
+                    THIS IS WHAT MY VIRTUAL DOM TREE SHOULD LOOK LIKE
+
+
+
+                       div id=app class="im-not-a-wrapper"
+                 |            |               \                 \
+                |            |                 \                 \
+          {{ header}}    div class=col1 {{ secondheader }}     div class=col2 
+                        |           \                             |      \
+                       |             \                           |        \
+                      p              p                           p         p
+                     |               \                          |          \
+                   1 {{ val }}  2 {{ val }}               3 {{ newval }}  4 {{ newval }}
+    -->
+    <script>
+        class Node {
+            static parseDOM(arg) {
+                let el = arg;
+                if (typeof arg === "string") {
+                    el = document.getElementById(arg);
+                }
+
+                return new Node({
+                      id: el.id,
+                      classes: el.classList,
+                      tag: el.tagName,
+                      children: Array.prototype
+                                    .slice.call( el.children )
+                                    .map(Node.parseDOM),
+                      style: el.style
+                });
+            }
+
+            constructor(params) {
+                const { id, classes, tag, children, value } = params;
+                this.id = id;
+                this.classes = classes;
+                this.tag = tag;
+                this.children = children;
+            }
+        }
+
+        const virtualDOM = Node.parseDOM('app');
+    </script>
+</body>
+
+</html>
