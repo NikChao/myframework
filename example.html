@@ -13,6 +13,8 @@
         <p>/** Notes</p>
         <p> * Currently the virtual dom recurses from root -> all leaves, this is grossly inneficient </p>
         <p> * Currently change handlers only fire on blur</p>
+        <p> * Nesting logic breaks everything </p>
+        <p> * TODO: f-else to be implemented </p>
         <p>*/</p>
     </div>
     <div id="app">
@@ -20,12 +22,7 @@
         <button f-on:click="add">add</button>
         <p>Todos</p>
         <div f-for="todo in todos">
-            <div f-if="todo.done">
-                <s><p>{{ todo.name }}</p></s>
-            </div>
-            <div f-else>
-                <p>{{ todo.name }}</p>
-            </div>
+            <p>{{ todo.name }}</p>>
         </div>
     </div>
     <script type="text/javascript">
@@ -33,7 +30,8 @@
             el: '#app',
             data: {
                 name: '',
-                todos: []
+                todos: [],
+                show: false
             },
             methods: {
                 add: function() {

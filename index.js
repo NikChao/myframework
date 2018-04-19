@@ -136,6 +136,9 @@ class Frame {
                 if (!this.data[key]) {
                     domu(child).hide();
                 }
+                const elseKey = child.getAttribute("f-else");
+                if (!elseKey) continue;
+                // else logic
             }
         }
     }
